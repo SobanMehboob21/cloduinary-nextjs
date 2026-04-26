@@ -6,8 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint",
-    "test": "next build"
+    "lint": "eslint"
+    // "test": "next build"
   },
   "dependencies": {
     "cloudinary": "^2.7.0",

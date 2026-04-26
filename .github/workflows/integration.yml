@@ -19,34 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./my-app
+        working-directory: ./my-app # This tells GitHub to look inside my-app
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Detect package manager
-        id: detect-package-manager
-        run: |
-          if [ -f "yarn.lock" ]; then
-            echo "manager=yarn" >> $GITHUB_OUTPUT
-            echo "command=install" >> $GITHUB_OUTPUT
-            echo "runner=yarn" >> $GITHUB_OUTPUT
-            exit 0
-          elif [ -f "package.json" ]; then
-            echo "manager=npm" >> $GITHUB_OUTPUT
-            echo "command=ci" >> $GITHUB_OUTPUT
-            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
-            exit 0
-          else
-            echo "Unable to determine package manager"
-            exit 1
-          fi
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: ${{ steps.detect-package-manager.outputs.manager }}
+          cache: 'npm'
           cache-dependency-path: ./my-app/package-lock.json
 
       - name: Setup Pages
@@ -55,18 +37,18 @@ jobs:
           enablement: true
 
       - name: Install dependencies
-        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+        run: npm ci
 
       - name: Run Tests
-        run: npm test # Running tests before building ensures broken code isn't deployed
+        run: npm test # This will now run 'next lint' inside my-app
 
       - name: Build with Next.js
-        run: ${{ steps.detect-package-manager.outputs.runner }} next build
+        run: npx next build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./my-app/out
+          path: ./my-app/out # Points to the output folder inside my-app
 
   deploy:
     environment:

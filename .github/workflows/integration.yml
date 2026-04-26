@@ -40,7 +40,7 @@ jobs:
         run: npm ci
 
       - name: Run Tests
-        run: npm test --prefix my-app
+        run: npm test 
 
       - name: Build with Next.js
         run: npx next build

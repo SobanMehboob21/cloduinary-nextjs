@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: production
+  labels:
+    tier: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cloudinary-next
+  template:
+    metadata:
+      labels:
+        app: cloudinary-next
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values: ["cloudinary-next"]
+              topologyKey: "kubernetes.io/hostname" 
+      initContainers:
+      - name: wait-for-db 
+        image: busybox:1.28 
+        command: ['sh', '-c', 'until nslookup mongodb-service; do sleep 2; done']
+      containers:
+      - name: frontend-container
+        image: soban11776/cloudinary-frontend:latest
+        imagePullPolicy: IfNotPresent
+        securityContext: 
+          allowPrivilegeEscalation: false    
+          readOnlyRootFilesystem: false      
+          capabilities:
+            drop: ["ALL"]
+        envFrom: 
+        - secretRef:
+            name: backend-secret
+        - configMapRef:
+            name: backend-config
+        ports:
+        - containerPort: 3000 
+        volumeMounts:
+        - name: cache-volume
+          mountPath: /my-app/.next/cache
+        - name: tmp-volume
+          mountPath: /tmp
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      volumes:
+      - name: cache-volume
+        emptyDir: {}
+      - name: tmp-volume
+        emptyDir: {}

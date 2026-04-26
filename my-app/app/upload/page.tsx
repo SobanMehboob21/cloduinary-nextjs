@@ -60,7 +60,7 @@ export default function Upload() {
         <div className="w-80 flex gap-4">
           {isCard.map((cards, idx) => (
             <div className="" key={idx}>
-              <img src={cards.image} />
+              <img src={cards.image} alt="img"/>
               <div className="text-center mt-2">
               <h1 className="font-medium text-xs">{cards.title}</h1>
               <p className="font-medium text-xs">{cards.content}</p>
